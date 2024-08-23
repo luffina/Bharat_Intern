@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+</head>
+<body>
+    <div id="background"></div>
+    <div class="container">
+        <h2>Registration Form</h2>
+        <form action="/register" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Register</button>
+        </form>
+    </div>
+    <script>
+        // Setup basic Three.js elements
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('background').appendChild(renderer.domElement);
+
+        // Create the particle system
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 1000;
+        const starPositions = new Float32Array(starCount * 3);
+
+        for (let i = 0; i < starCount * 3; i += 3) {
+            starPositions[i] = Math.random() * 2000 - 1000;   // x
+            starPositions[i + 1] = Math.random() * 2000 - 1000; // y
+            starPositions[i + 2] = Math.random() * 2000 - 1000; // z
+        }
+
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+        const starField = new THREE.Points(starGeometry, starMaterial);
+
+        scene.add(starField);
+
+        camera.position.z = 500;
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Move stars downwards
+            starField.geometry.attributes.position.array.forEach((_, index) => {
+                if (index % 3 === 1) {
+                    starField.geometry.attributes.position.array[index] -= 2;
+                    if (starField.geometry.attributes.position.array[index] < -1000) {
+                        starField.geometry.attributes.position.array[index] = 1000;
+                    }
+                }
+            });
+
+            starField.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Adjust canvas size when window is resized
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
